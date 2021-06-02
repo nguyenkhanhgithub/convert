@@ -1,0 +1,40 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: ${POSTGRE_DATABASE_URL}
+    username: ${POSTGRE_USER}
+    password: ${POSTGRE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 5
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+    web:
+      pageable:
+        size-parameter: size
+        page-parameter: page
+        default-page-size: 20
+        max-page-size: 2000
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: none
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+    show-sql: false
+  batch:
+    jdbc:
+      initialize-schema: always
+debug: ${DEBUG}
+server:
+  port: ${PORT}
+  error:
+    include-stacktrace: on_param
+logging:
+  level:
+    com.chozoi: ${LOG_LEVEL}
+    org.springframework: ${LOG_LEVEL}
