@@ -1,14 +1,18 @@
 package com.example.convertdata.domain.services;
 
-import com.example.convertdata.domain.data.ShopOrderStats;
+import com.example.convertdata.domain.data.*;
 import com.example.convertdata.domain.entities.Product;
 import com.example.convertdata.domain.entities.ShopOrder;
 import com.example.convertdata.domain.entities.mongo.ShopOrderTotalStats;
+import com.example.convertdata.domain.entities.mongo.ShopProductStats;
 import com.example.convertdata.domain.entities.types.OrderState;
 import com.example.convertdata.domain.entities.types.OrderType;
+import com.example.convertdata.domain.entities.types.ProductState;
+import com.example.convertdata.domain.entities.types.ProductType;
 import com.example.convertdata.domain.repositories.ProductRepository;
 import com.example.convertdata.domain.repositories.ShopOrderRepository;
 import com.example.convertdata.domain.repositories.mongo.ShopOrderTotalStatsRepository;
+import com.example.convertdata.domain.repositories.mongo.ShopProductTotalStatsRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,9 +20,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 public class ConvertService {
   @Autowired protected ShopOrderRepository shopOrderRepository;
   @Autowired protected ProductRepository productRepository;
+  @Autowired protected ShopProductTotalStatsRepository shopProductTotalStatsRepository;
 
   //mongo
   @Autowired protected ShopOrderTotalStatsRepository shopOrderTotalStatsRepository;
@@ -72,9 +79,35 @@ public class ConvertService {
     return ResponseEntity.ok(responses);
   }
 
-  public ResponseEntity<?> product(Pageable pageable) {
-    Page<Product> products = productRepository.findAllByIdNotNull(pageable);
-    return ResponseEntity.ok(products);
+  public ResponseEntity<?> product(ListProduct listProduct) {
+    List<ShopProductStats> list = new ArrayList<>();
+    for (ProductStats productStats : listProduct.getProductStats()) {
+      ShopProductStats shopProductStats = shopProductTotalStatsRepository.findById(productStats.getShop_id()).orElse(null);
+      if (Objects.isNull(shopProductStats)) {
+        shopProductStats = new ShopProductStats(productStats);
+      } else {
+        shopProductStats.assignFrom(productStats);
+      }
+      shopProductStats.setUpdatedAt(LocalDateTime.now());
+      list.add(shopProductStats);
+    }
+    shopProductTotalStatsRepository.saveAll(list);
+    return ResponseEntity.ok(list);
   }
 
+  public ResponseEntity<?> productOutStock(ListProductOutStock listProductOutStock) {
+    Map<Integer, List<ProductOutStock>> productOutStockMap =
+            listProductOutStock.getProductOutStocks().stream().collect(Collectors.groupingBy(ProductOutStock::getShop_id, Collectors.toList()));
+
+    for (Map.Entry<Integer, List<ProductOutStock>> entry : productOutStockMap.entrySet()) {
+      int totalValue = entry.getValue().stream().mapToInt(ProductOutStock::getProduct_out_stock).sum();
+      log.info("----ShopId, product-out-stock: {}, {}", entry.getKey(), totalValue);
+      ShopProductStats shopProductStats = shopProductTotalStatsRepository.findById(entry.getKey()).orElse(null);
+      if (Objects.nonNull(shopProductStats)) {
+        shopProductStats.setTotalProductOutStock(totalValue);
+        shopProductTotalStatsRepository.save(shopProductStats);
+      }
+    }
+    return ResponseEntity.ok(true);
+  }
 }

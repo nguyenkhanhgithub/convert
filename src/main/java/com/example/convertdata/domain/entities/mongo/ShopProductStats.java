@@ -1,5 +1,6 @@
 package com.example.convertdata.domain.entities.mongo;
 
+import com.example.convertdata.domain.data.ProductStats;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -49,36 +50,30 @@ public class ShopProductStats {
   @Field(value = "updated_at")
   private LocalDateTime updatedAt;
 
-  public ShopProductStats(int shopId, int totalProductDraft,
-                          int totalProductPending, int totalProductReady,
-                          int totalProductPublic, int totalProductReject, int totalProductReport,
-                          int totalProductDeleted, int totalProductAuctionPublic, int totalProductOutStock) {
-    setId(shopId);
-    setTotalProductDraft(0);
-    setTotalProductPending(0);
-    setTotalProductReady(0);
-    setTotalProductPublic(0);
-    setTotalProductReject(0);
-    setTotalProductReport(0);
-    setTotalProductDeleted(0);
+  public ShopProductStats(ProductStats productStats) {
+    setId(productStats.getShop_id());
+    setTotalProductDraft(productStats.getTotal_draft());
+    setTotalProductPending(productStats.getTotal_pending());
+    setTotalProductReady(productStats.getTotal_ready());
+    setTotalProductPublic(productStats.getTotal_public());
+    setTotalProductReject(productStats.getTotal_reject());
+    setTotalProductReport(productStats.getTotal_report());
+    setTotalProductDeleted(productStats.getTotal_deleted());
     setTotalProductReturn(0);
-    setTotalProductAuctionPublic(0);
+    setTotalProductAuctionPublic(productStats.getTotal_auction());
     setTotalProductOutStock(0);
   }
 
-  public void assignFrom(int totalProductDraft,
-                          int totalProductPending, int totalProductReady,
-                          int totalProductPublic, int totalProductReject, int totalProductReport,
-                          int totalProductDeleted, int totalProductAuctionPublic, int totalProductOutStock) {
-    setTotalProductDraft(0);
-    setTotalProductPending(0);
-    setTotalProductReady(0);
-    setTotalProductPublic(0);
-    setTotalProductReject(0);
-    setTotalProductReport(0);
-    setTotalProductDeleted(0);
+  public void assignFrom(ProductStats productStats) {
+    setTotalProductDraft(productStats.getTotal_draft());
+    setTotalProductPending(productStats.getTotal_pending());
+    setTotalProductReady(productStats.getTotal_ready());
+    setTotalProductPublic(productStats.getTotal_public());
+    setTotalProductReject(productStats.getTotal_reject());
+    setTotalProductReport(productStats.getTotal_report());
+    setTotalProductDeleted(productStats.getTotal_deleted());
     setTotalProductReturn(0);
-    setTotalProductAuctionPublic(0);
+    setTotalProductAuctionPublic(productStats.getTotal_auction());
     setTotalProductOutStock(0);
   }
 }

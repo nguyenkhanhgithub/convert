@@ -1,12 +1,11 @@
 package com.example.convertdata.app.controllers;
 
+import com.example.convertdata.domain.data.ListProduct;
+import com.example.convertdata.domain.data.ListProductOutStock;
 import com.example.convertdata.domain.services.ConvertService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "v1/convert")
@@ -20,9 +19,15 @@ public class Controller {
     return convertService.shopOrder();
   }
 
-  @GetMapping("product")
-  public ResponseEntity<?> product(Pageable pageable) {
-    return convertService.product(pageable);
+  @PostMapping("product")
+  public ResponseEntity<?> product(@RequestBody ListProduct listProduct) {
+    return convertService.product(listProduct);
   }
+
+  @PostMapping("product/out-stock")
+  public ResponseEntity<?> productOutStock(@RequestBody ListProductOutStock productOutStock) {
+    return convertService.productOutStock(productOutStock);
+  }
+
 
 }
